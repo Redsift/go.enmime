@@ -243,6 +243,15 @@ func TestDetectCharacterSetInHTML(t *testing.T) {
 	assert.True(t, strings.ContainsRune(mime.Html, 0x20ac), "HTML body should have contained a Unicode Euro Symbol")
 }
 
+func TestDuplicateParamsInMime(t *testing.T) {
+	msg := readMessage("mime-duplicate-param.raw")
+	mime, err := ParseMIMEBody(msg)
+	if err != nil {
+		t.Fatalf("Failed to parse MIME with Duplicate params: %v", err)
+	}
+	assert.True(t, mime.Attachments[0].FileName() == "Invoice_302232133150612.pdf", "Mail should have a part with filename Invoice_302232133150612.pdf")
+}
+
 // readMessage is a test utility function to fetch a mail.Message object.
 func readMessage(filename string) *mail.Message {
 	// Open test email for parsing
