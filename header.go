@@ -162,7 +162,7 @@ func plainSpaceState(h *headerDec) stateFn {
 			if h.accept("?") {
 				return charsetState
 			}
-		case h.accept(" \t\r\n("):
+		case h.accept(` \t\r\n("'`):
 			// '(' is the start of a MIME header "comment", so it is still legal to transition
 			// to an encoded word after it
 		default:
