@@ -2,7 +2,6 @@ package enmime
 
 import (
 	"fmt"
-	"mime"
 	"net/mail"
 	"net/textproto"
 	"strings"
@@ -27,7 +26,7 @@ var AddressHeaders = []string{"From", "To", "Delivered-To", "Cc", "Bcc", "Reply-
 func IsMultipartMessage(mailMsg *mail.Message) bool {
 	// Parse top-level multipart
 	ctype := mailMsg.Header.Get("Content-Type")
-	mediatype, _, err := mime.ParseMediaType(ctype)
+	mediatype, _, err := parseMediaType(ctype)
 	if err != nil {
 		return false
 	}
@@ -57,12 +56,12 @@ func IsMultipartMessage(mailMsg *mail.Message) bool {
 //    Content-Type: attachment; filename="frog.jpg"
 //
 func IsAttachment(header mail.Header) bool {
-	mediatype, _, _ := mime.ParseMediaType(header.Get("Content-Disposition"))
+	mediatype, _, _ := parseMediaType(header.Get("Content-Disposition"))
 	if strings.ToLower(mediatype) == "attachment" {
 		return true
 	}
 
-	mediatype, _, _ = mime.ParseMediaType(header.Get("Content-Type"))
+	mediatype, _, _ = parseMediaType(header.Get("Content-Type"))
 	if strings.ToLower(mediatype) == "attachment" {
 		return true
 	}
@@ -80,7 +79,7 @@ func IsPlain(header mail.Header, emptyContentTypeIsPlain bool) bool {
 		return true
 	}
 
-	mediatype, _, err := mime.ParseMediaType(ctype)
+	mediatype, _, err := parseMediaType(ctype)
 	if err != nil {
 		return false
 	}
@@ -107,7 +106,7 @@ func IsBinaryBody(mailMsg *mail.Message) bool {
 func binMIME(mailMsg *mail.Message) (*MIMEBody, error) {
 	// Root Node of our tree
 	ctype := mailMsg.Header.Get("Content-Type")
-	mediatype, mparams, err := mime.ParseMediaType(ctype)
+	mediatype, mparams, err := parseMediaType(ctype)
 	if err != nil {
 		mediatype = "attachment"
 	}
@@ -126,7 +125,7 @@ func binMIME(mailMsg *mail.Message) (*MIMEBody, error) {
 	// get set headers
 	p.header = make(textproto.MIMEHeader, 4)
 	// Figure out our disposition, filename
-	disposition, dparams, err := mime.ParseMediaType(mailMsg.Header.Get("Content-Disposition"))
+	disposition, dparams, err := parseMediaType(mailMsg.Header.Get("Content-Disposition"))
 	if err == nil {
 		// Disposition is optional
 		p.disposition = disposition
@@ -174,7 +173,7 @@ func ParseMIMEBody(mailMsg *mail.Message) (*MIMEBody, error) {
 		// Check for HTML at top-level, eat errors quietly
 		ctype := mailMsg.Header.Get("Content-Type")
 		if ctype != "" {
-			if mediatype, mparams, err := mime.ParseMediaType(ctype); err == nil {
+			if mediatype, mparams, err := parseMediaType(ctype); err == nil {
 				/*
 				 *Content-Type: text/plain;\t charset="hz-gb-2312"
 				 */
@@ -202,7 +201,7 @@ func ParseMIMEBody(mailMsg *mail.Message) (*MIMEBody, error) {
 	} else {
 		// Parse top-level multipart
 		ctype := mailMsg.Header.Get("Content-Type")
-		mediatype, params, err := mime.ParseMediaType(ctype)
+		mediatype, params, err := parseMediaType(ctype)
 		if err != nil {
 			return nil, fmt.Errorf("Unable to parse media type: %v", err)
 		}

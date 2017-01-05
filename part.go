@@ -104,7 +104,7 @@ func ParseMIME(reader *bufio.Reader) (MIMEPart, error) {
 	if err != nil {
 		return nil, err
 	}
-	mediatype, params, err := mime.ParseMediaType(header.Get("Content-Type"))
+	mediatype, params, err := parseMediaType(header.Get("Content-Type"))
 	if err != nil {
 		return nil, err
 	}
@@ -126,6 +126,28 @@ func ParseMIME(reader *bufio.Reader) (MIMEPart, error) {
 	}
 
 	return root, nil
+}
+
+func parseMediaType(ctype string) (string, map[string]string, error) {
+	// Parse Content-Type header
+	mtype, mparams, err := mime.ParseMediaType(ctype)
+	if err != nil {
+		// Small hack to remove harmless charset duplicate params
+		mctype := parseBadContentType(ctype, ";")
+		mtype, mparams, err = mime.ParseMediaType(mctype)
+		if err != nil {
+			// Some badly formed content-types forget to send a ; between fields
+			mctype := parseBadContentType(ctype, " ")
+			if strings.Contains(mctype, `name=""`) {
+				mctype = strings.Replace(mctype, `name=""`, `name=" "`, -1)
+			}
+			mtype, mparams, err = mime.ParseMediaType(mctype)
+			if err != nil {
+				return "", make(map[string]string), err
+			}
+		}
+	}
+	return mtype, mparams, err
 }
 
 func parseBadContentType(ctype, sep string) string {
@@ -179,22 +201,9 @@ func parseParts(parent *memMIMEPart, reader io.Reader, boundary string) error {
 		if ctype == "" {
 			return fmt.Errorf("Missing Content-Type at boundary %v", boundary)
 		}
-		mediatype, mparams, err := mime.ParseMediaType(ctype)
+		mediatype, mparams, err := parseMediaType(ctype)
 		if err != nil {
-			// Small hack to remove harmless charset duplicate params
-			mctype := parseBadContentType(ctype, ";")
-			mediatype, mparams, err = mime.ParseMediaType(mctype)
-			if err != nil {
-				// Some badly formed content-types forget to send a ; between fields
-				mctype := parseBadContentType(ctype, " ")
-				if strings.Contains(mctype, `name=""`) {
-					mctype = strings.Replace(mctype, `name=""`, `name=" "`, -1)
-				}
-				mediatype, mparams, err = mime.ParseMediaType(mctype)
-				if err != nil {
-					return err
-				}
-			}
+			return err
 		}
 
 		// Insert ourselves into tree, p is enmime's mime-part
@@ -208,7 +217,7 @@ func parseParts(parent *memMIMEPart, reader io.Reader, boundary string) error {
 		prevSibling = p
 
 		// Figure out our disposition, filename
-		disposition, dparams, err := mime.ParseMediaType(mrp.Header.Get("Content-Disposition"))
+		disposition, dparams, err := parseMediaType(mrp.Header.Get("Content-Disposition"))
 		if err == nil {
 			// Disposition is optional
 			p.disposition = disposition
