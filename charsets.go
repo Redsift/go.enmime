@@ -27,7 +27,6 @@ var encodings = map[string]struct {
 	"unicode-1-1-utf-8":   {encoding.Nop, "utf-8"},
 	"utf-8":               {encoding.Nop, "utf-8"},
 	"utf8":                {encoding.Nop, "utf-8"},
-	"charset=utf-8":       {encoding.Nop, "utf-8"},
 	"866":                 {charmap.CodePage866, "ibm866"},
 	"cp866":               {charmap.CodePage866, "ibm866"},
 	"csibm866":            {charmap.CodePage866, "ibm866"},
@@ -262,7 +261,19 @@ func ConvertToUTF8String(charset string, textBytes []byte) (string, error) {
 	}
 	item, ok := encodings[strings.ToLower(charset)]
 	if !ok {
-		return "", fmt.Errorf("Unsupport charset %s", charset)
+		// Try to parse charset again here to see if we can salvage some badly formed ones
+		// like charset="charset=utf-8"
+		charsetp := strings.Split(charset, "=")
+		if strings.ToLower(charsetp[0]) == "charset" && len(charsetp) > 1 {
+			charset = charsetp[1]
+			item, ok = encodings[strings.ToLower(charset)]
+			if !ok {
+				return "", fmt.Errorf("Unsupport charset %s", charset)
+			}
+		} else {
+			// Failed to get a conversion reader
+			return "", fmt.Errorf("Unsupport charset %s", charset)
+		}
 	}
 	input := bytes.NewReader(textBytes)
 	reader := transform.NewReader(input, item.e.NewDecoder())
