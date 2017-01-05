@@ -244,13 +244,25 @@ var encodings = map[string]struct {
 	"iso646-us":           {charmap.Windows1252, "windows-1252"}, // ISO646 isn't us-ascii but 1991 version is.
 	"iso: western":        {charmap.Windows1252, "windows-1252"}, // same as iso-8859-1
 	"we8iso8859p1":        {charmap.Windows1252, "windows-1252"}, // same as iso-8859-1
-	"iso=8859-1":          {charmap.Windows1252, "windows-1252"}, // same as iso-8859-1
 	"cp936":               {simplifiedchinese.GBK, "gbk"},        // same as gb2312
 	"cp850":               {charmap.CodePage850, "cp850"},
 	"cp-850":              {charmap.CodePage850, "cp850"},
 	"ibm850":              {charmap.CodePage850, "cp850"},
 	"136":                 {traditionalchinese.Big5, "big5"}, // same as chinese big5
 	"cp932":               {japanese.ShiftJIS, "shift_jis"},
+	"8859-1":              {charmap.Windows1252, "windows-1252"},
+	"8859-2":              {charmap.ISO8859_2, "iso-8859-2"},
+	"8859-3":              {charmap.ISO8859_3, "iso-8859-3"},
+	"8859-4":              {charmap.ISO8859_4, "iso-8859-4"},
+	"8859-5":              {charmap.ISO8859_5, "iso-8859-5"},
+	"8859-6":              {charmap.ISO8859_6, "iso-8859-6"},
+	"8859-7":              {charmap.ISO8859_7, "iso-8859-7"},
+	"8859-8":              {charmap.ISO8859_8, "iso-8859-8"},
+	"8859-10":             {charmap.ISO8859_10, "iso-8859-10"},
+	"8859-13":             {charmap.ISO8859_13, "iso-8859-13"},
+	"8859-14":             {charmap.ISO8859_14, "iso-8859-14"},
+	"8859-15":             {charmap.ISO8859_15, "iso-8859-15"},
+	"8859-16":             {charmap.ISO8859_16, "iso-8859-16"},
 }
 
 var charsetRegexp *regexp.Regexp
@@ -265,7 +277,8 @@ func ConvertToUTF8String(charset string, textBytes []byte) (string, error) {
 		// Try to parse charset again here to see if we can salvage some badly formed ones
 		// like charset="charset=utf-8"
 		charsetp := strings.Split(charset, "=")
-		if strings.ToLower(charsetp[0]) == "charset" && len(charsetp) > 1 {
+		if (strings.ToLower(charsetp[0]) == "charset" && len(charsetp) > 1) ||
+			(strings.ToLower(charsetp[0]) == "iso" && len(charsetp) > 1) {
 			charset = charsetp[1]
 			item, ok = encodings[strings.ToLower(charset)]
 			if !ok {
