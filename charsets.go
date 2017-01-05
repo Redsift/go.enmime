@@ -250,6 +250,7 @@ var encodings = map[string]struct {
 	"cp-850":              {charmap.CodePage850, "cp850"},
 	"ibm850":              {charmap.CodePage850, "cp850"},
 	"136":                 {traditionalchinese.Big5, "big5"}, // same as chinese big5
+	"cp932":               {japanese.ShiftJIS, "shift_jis"},
 }
 
 var charsetRegexp *regexp.Regexp
