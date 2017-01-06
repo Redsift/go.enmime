@@ -263,6 +263,7 @@ var encodings = map[string]struct {
 	"8859-14":             {charmap.ISO8859_14, "iso-8859-14"},
 	"8859-15":             {charmap.ISO8859_15, "iso-8859-15"},
 	"8859-16":             {charmap.ISO8859_16, "iso-8859-16"},
+	"utf8mb4":             {encoding.Nop, "utf-8"}, // emojis and stuff but golang can handle it directly
 }
 
 var charsetRegexp *regexp.Regexp
