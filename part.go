@@ -132,7 +132,7 @@ func parseMediaType(ctype string) (string, map[string]string, error) {
 	// Parse Content-Type header
 	mtype, mparams, err := mime.ParseMediaType(ctype)
 	defer func() {
-		if err != nil {
+		if err != nil && ctype != "" {
 			fmt.Printf("parseMediaType error: %s\n", ctype)
 		}
 	}()
