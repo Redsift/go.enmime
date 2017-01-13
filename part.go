@@ -131,6 +131,11 @@ func ParseMIME(reader *bufio.Reader) (MIMEPart, error) {
 func parseMediaType(ctype string) (string, map[string]string, error) {
 	// Parse Content-Type header
 	mtype, mparams, err := mime.ParseMediaType(ctype)
+	defer func() {
+		if err != nil {
+			fmt.Printf("parseMediaType error: %s", ctype)
+		}
+	}()
 	if err != nil {
 		// Small hack to remove harmless charset duplicate params
 		mctype := parseBadContentType(ctype, ";")
