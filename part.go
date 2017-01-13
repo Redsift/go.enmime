@@ -133,7 +133,7 @@ func parseMediaType(ctype string) (string, map[string]string, error) {
 	mtype, mparams, err := mime.ParseMediaType(ctype)
 	defer func() {
 		if err != nil {
-			fmt.Printf("parseMediaType error: %s", ctype)
+			fmt.Printf("parseMediaType error: %s\n", ctype)
 		}
 	}()
 	if err != nil {
