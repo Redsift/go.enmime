@@ -241,6 +241,10 @@ func TestBadContentTypes(t *testing.T) {
 			"mtype":    "inline",
 			"filename": "",
 		},
+		`text/html; charset="iso-8859-1"<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">`: map[string]string{
+			"mtype":   "text/html",
+			"charset": "iso-8859-1",
+		},
 	}
 
 	for ctype, m := range bctypes {

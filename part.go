@@ -137,6 +137,12 @@ func parseMediaType(ctype string) (string, map[string]string, error) {
 		}
 	}()
 	if err != nil {
+		// check if ctype contains <!DOCTYPE tag and remove it
+		dtIdx := strings.Index(ctype, "<!DOCTYPE")
+		if dtIdx > -1 {
+			ctype = ctype[0:dtIdx]
+		}
+
 		// Small hack to remove harmless charset duplicate params
 		mctype := parseBadContentType(ctype, ";")
 		mtype, mparams, err = mime.ParseMediaType(mctype)
