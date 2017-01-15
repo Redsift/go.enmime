@@ -162,10 +162,24 @@ func parseBadContentType(ctype, sep string) string {
 		if strings.Contains(p, "=") {
 			params := strings.Split(p, "=")
 			if !strings.Contains(mctype, params[0]+"=") {
-				mctype += p + ";"
+				k := params[0]
+				v := `""`
+				if len(params) > 1 && params[1] != "" {
+					v = params[1]
+				}
+				if v != `""` && (strings.TrimSpace(k) == "name" ||
+					strings.TrimSpace(k) == "filename") { // check if quoted
+					if !strings.HasPrefix(v, `"`) {
+						v = `"` + v
+					}
+					if !strings.HasSuffix(v, `"`) {
+						v = v + `"`
+					}
+				}
+				mctype += k + "=" + v + sep
 			}
 		} else {
-			mctype += p + ";"
+			mctype += p + sep
 		}
 	}
 	return mctype

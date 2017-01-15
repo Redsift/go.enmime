@@ -226,6 +226,42 @@ func TestBadBoundaryTerm(t *testing.T) {
 	assert.Nil(t, p.NextSibling(), "Second child should not have a sibling")
 }
 
+func TestBadContentTypes(t *testing.T) {
+	bctypes := map[string]map[string]string{
+		`text/csv; charset=utf-8; name=Email_-_SL:_ITR_and_CTR_by_day.csv; name=Email_-_SL:_ITR_and_CTR_by_day.csv`: map[string]string{
+			"mtype":   "text/csv",
+			"charset": "utf-8",
+			"name":    "Email_-_SL:_ITR_and_CTR_by_day.csv",
+		},
+		`ATTACHMENT; filename=http://www.it4profit.com/mms/image_server.jsp`: map[string]string{
+			"mtype":    "attachment",
+			"filename": "http://www.it4profit.com/mms/image_server.jsp",
+		},
+		`inline; filename=`: map[string]string{
+			"mtype":    "inline",
+			"filename": "",
+		},
+	}
+
+	for ctype, m := range bctypes {
+		mtype, params, err := parseMediaType(ctype)
+		if err != nil {
+			t.Fatalf("Error parsing bad content type: %s", err)
+		}
+		if mtype != m["mtype"] {
+			t.Fatalf("Error parsing bad content. Got media type (%s) but expecting (%s)", mtype, m["mtype"])
+		}
+		for k, v := range m {
+			if k == "mtype" {
+				continue
+			}
+			if params[k] != v {
+				t.Fatalf("Error parsing bad content. Got param (%s=%s) but expecting (%s=%s)", k, v, k, params[k])
+			}
+		}
+	}
+}
+
 // openPart is a test utility function to open a part as a reader
 func openPart(filename string) *bufio.Reader {
 	// Open test part for parsing
