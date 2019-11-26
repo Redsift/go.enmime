@@ -30,8 +30,9 @@ func (qp *Base64Cleaner) Read(p []byte) (n int, err error) {
 	bn, err := qp.in.Read(buf)
 	for i := 0; i < bn; i++ {
 		switch buf[i] {
-		case ' ', '\t', '\r', '\n':
+		case ' ', '\t', '\r', '\n', '=':
 			// Strip these
+			// re: '='; we are using base64.RawStdEncoding which has not padding
 		default:
 			p[n] = buf[i]
 			n++
