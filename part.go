@@ -290,7 +290,7 @@ func decodeSection(encoding string, reader io.Reader) ([]byte, error) {
 		decoder = quotedprintable.NewReader(reader)
 	case "base64":
 		cleaner := NewBase64Cleaner(reader)
-		decoder = base64.NewDecoder(base64.StdEncoding, cleaner)
+		decoder = base64.NewDecoder(base64.RawStdEncoding, cleaner)
 	}
 
 	// Read bytes into buffer
